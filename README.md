@@ -171,8 +171,6 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 ## g. How I used AI tools
 
 - **Code generation**: Used an AI assistant to generate initial structure, I then adjusted types, error handling, and project layout to match my preferences.
-- **README**: I wrote the README myself 
-
 
 ---
 

@@ -3,30 +3,29 @@ A conversational RAG application that answers questions from your uploaded docum
 
 ## a. Quick setup
 
-### Prerequisites
+### 1. Prerequisites
 - Python 3.11+
 - [Ollama](https://ollama.ai) installed and running (free local LLM)
 - Pull a model: `ollama pull qwen2:latest`
 - Run the model locally with: `ollama run qwen2:latest`
 
-# Create Virtual env 
-  `python -m venv .venv`
-  `.venv\Scripts\activate`
+### 2. How to run project locally
+#### Create Virtual env 
+   - python -m venv .venv
+   - .venv\Scripts\activate  
 
-# Install
-`pip install -r requirements.txt`
+#### Install
+pip install -r requirements.txt
 
-# Optional: copy env and edit
-`copy .env.example .env`
+#### Optional: copy env and edit
+copy .env.example .env
+#### Set OLLAMA_BASE_URL if Ollama is not on localhost
+>
+#### Terminal1 - Start backend - API
+uvicorn app.main:app --reload
 
-## Set OLLAMA_BASE_URL if Ollama is not on localhost
-
-## Terminal1 - Start backend - API
-`uvicorn app.main:app --reload`
-
-## Terminal2 - start UI
-`streamlit run ui/streamlit_app.py`
-
+#### Terminal2 - start UI
+streamlit run ui/streamlit_app.py
 
 ## b. Architecture overview
 ```

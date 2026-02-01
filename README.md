@@ -10,22 +10,22 @@ A conversational RAG application that answers questions from your uploaded docum
 - Run the model locally with: `ollama run qwen2:latest`
 
 ### 2. How to run project locally
-#### Create Virtual env 
-   - python -m venv .venv
-   - .venv\Scripts\activate  
+#### a. Create Virtual env 
+   `python -m venv .venv`
+   `.venv\Scripts\activate`
 
-#### Install
-pip install -r requirements.txt
+#### b. Install
+`pip install -r requirements.txt`
 
-#### Optional: copy env and edit
-copy .env.example .env
-#### Set OLLAMA_BASE_URL if Ollama is not on localhost
+#### c. Optional: copy env and edit
+`copy .env.example .env`
+#### d. Set OLLAMA_BASE_URL if Ollama is not on localhost
 >
-#### Terminal1 - Start backend - API
-uvicorn app.main:app --reload
+#### e. Terminal 1 - Start backend - API
+`uvicorn app.main:app --reload`
 
-#### Terminal2 - start UI
-streamlit run ui/streamlit_app.py
+#### f. Terminal 2 - start UI
+`streamlit run ui/streamlit_app.py`
 
 ## b. Architecture overview
 ```

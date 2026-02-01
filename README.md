@@ -196,6 +196,7 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 - **Docker**: Build, test, and deploy applications quickly
 - **Monitoring**: Cloud monitoring for Performance and Scalability
 - **Guardrails**: Scope to enhance safety, security, and ethical frameworks
-
+- **Agentic**: User → Planner → Tools (vector search, web, calculator, DB, etc.) → LLM synthesizer → Answer. This approach helps if docs are outdates, incomplete or missing real information.
+- **Memory Layer**: conversation memory
 ---
 

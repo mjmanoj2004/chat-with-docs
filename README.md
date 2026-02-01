@@ -96,45 +96,45 @@ What would be required to make this scalable and deployable on a hyper-scaler:
 
 ## d. RAG / LLM approach and decisions
 
-- LLM → Ollama
+- **LLM → Ollama**
 We used Ollama to run the language model locally because it is free, does not require an API key, and works well for assignments and demos.
 
-- Embeddings → sentence-transformers (all-MiniLM-L6-v2)
+- **Embeddings → sentence-transformers (all-MiniLM-L6-v2)**
 This model is free to use and provides a good balance between speed and accuracy for converting text into vector embeddings.
 
-- Vector Database → ChromaDB
+- **Vector Database → ChromaDB**
 ChromaDB stores embeddings locally in a persistent way. It is simple to use and integrates well with LangChain.
 
-- Framework → LangChain
+- **Framework → LangChain**
 LangChain was chosen to manage the RAG pipeline because it provides ready-made tools for document loading, retrieval, and chaining LLM responses.
 
-- Retrieval Method → Hybrid Search (semantic + BM25, top 5 results)
+- **Retrieval Method → Hybrid Search (semantic + BM25, top 5 results)**
 We combined semantic search with keyword-based BM25 and used Reciprocal Rank Fusion (RRF) to get more accurate and balanced search results as required in the assignment.
 
-- Chunking → RecursiveCharacterTextSplitter with `chunk_size=800`, `chunk_overlap=100`.
+- **Chunking → RecursiveCharacterTextSplitter** with `chunk_size=800`, `chunk_overlap=100`.
 Keeps context across chunk boundaries; 800/100 is a reasonable default for short answers and source citations.
 
-- Embeddings → all-MiniLM-L6-v2
+- **Embeddings → all-MiniLM-L6-v2**
 384 dims, fast, good for semantic similarity on documents.
 
-- Retrieval →
-**Semantic**: ChromaDB similarity search (top 5).
-**BM25**: In-memory index over the same chunks (built from Chroma when needed); top 5.
-**Merge**: Reciprocal Rank Fusion (RRF) then take **top 5** for the prompt.
+- **Retrieval** →
+Semantic: ChromaDB similarity search (top 5).
+BM25: In-memory index over the same chunks (built from Chroma when needed); top 5.
+Merge: Reciprocal Rank Fusion (RRF) then take **top 5** for the prompt.
 
-- Prompts →
-**System**: “Answer only from the provided context; if not in context, say so; cite source when possible.”
-**User**: Retrieved context + user question.
+- **Prompts** →
+System: “Answer only from the provided context; if not in context, say so; cite source when possible.”
+User: Retrieved context + user question.
 Keeps the model grounded and reduces hallucination.
 
-- Guardrails →
-**Prompt injection**: Simple deny-list of phrases (e.g. “ignore previous instructions”); reject and return a safe message.
-**Max tokens**: Capped in Ollama config (`num_predict` / `max_answer_tokens`).
-**Relevance**: Optional next step — score or filter retrieved chunks by similarity threshold before building context (not implemented in this minimal version).
+- **Guardrails** →
+Prompt injection: Simple deny-list of phrases (e.g. “ignore previous instructions”); reject and return a safe message.
+Max tokens: Capped in Ollama config (`num_predict` / `max_answer_tokens`).
+Relevance: Optional next step — score or filter retrieved chunks by similarity threshold before building context (not implemented in this minimal version).
 
-- Observability
-**Logging**: Structured logs with optional `x-trace-id`; log upload/ask latency and errors.
-**Token usage**: Not logged in this version; would add from Ollama/OpenAI response when moving to production.
+- **Observability**
+Logging: Structured logs with optional `x-trace-id`; log upload/ask latency and errors.
+Token usage: Not logged in this version; would add from Ollama/OpenAI response when moving to production.
 
 ---
 
@@ -182,7 +182,7 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 - **No auth**: Anyone with network access can upload and query.
 - **Basic prompt-injection filter**: Deny-list is easy to bypass; production would need a stronger approach (e.g. classifier or dedicated guardrail service).
 - **DOC/DOCX**: Relies on `unstructured` or `python-docx`; some edge formats may fail.
-- **No relevance threshold**: All top-5 chunks are passed to the LLM; noisy retrieval can affect answer quality.
+- **Tests** not performed fully. Some of the edge cases may fail.
 
 ---
 
@@ -197,6 +197,7 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 - **Serverless**: Going with serverless approach for like Lambda
 - **Docker**: Build, test, and deploy applications quickly
 - **Monitoring**: Cloud monitoring for Performance and Scalability
+- **Guardrails**: Scope to enhance safety, security, and ethical frameworks
 
 ---
 

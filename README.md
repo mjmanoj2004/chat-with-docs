@@ -221,7 +221,7 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 - **Reranker**: Add a cross-encoder or reranker step after hybrid retrieval.
 - **Token usage and cost**: Log and optionally expose token counts and cost per request.
 - **Managed vector DB**: Migrate to OpenSearch, Pinecone, or pgvector for production scale.
-- **LLM**: Best LLM (vLLMs) models hosted on GPU-enabled infrastructure like NVIDIA H100
+- **LLM**: Best LLM (vLLMs) models hosted on GPU-enabled infrastructure like NVIDIA H100. or AWS Bedrock
 - **AWS S3**: Store documents in Cloud platform like S3 buckets
 - **Serverless**: Going with serverless approach for like Lambda
 - **Docker**: Build, test, and deploy applications quickly
@@ -229,5 +229,6 @@ Skipped or minimal in this version: full async everywhere, token-usage logging, 
 - **Guardrails**: Scope to enhance safety, security, and ethical frameworks
 - **Agentic**: User → Planner → Tools (vector search, web, calculator, DB, etc.) → LLM synthesizer → Answer. This approach helps if docs are outdates, incomplete or missing real information.
 - **Memory Layer**: conversation memory
+- **Scaling**: FastAPI stateless and run on ECS and GPU-hosted open-source models
 ---
 

@@ -54,34 +54,34 @@ A conversational RAG application that answers questions from your uploaded docum
                     │  - Chat + session memory                     │
                     │  - Source toggle                             │
                     └───────────────┬──────────────────────────────┘
-                                    │ HTTP
-                                    │ /api/upload  /api/ask  /api/ask/stream  /api/collections
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           API / Orchestration Layer                          │
-│                         FastAPI Backend (port 8000)                          │
-│  Cross-cutting: trace_id, structured logs, latency metrics, error handling   │
-│  Guardrails: prompt-injection check, question length limit, context cap      │
-└───────────────┬───────────────────────────────────────────────┬──────────────┘
-                │                                               │
-                │ Upload path                                   │ Query path
-                ▼                                               ▼
-┌──────────────────────────────-─┐                 ┌───────────────────────────────┐
-│ Ingestion Service              │                 │ Retrieval + QA Service        │
-│ - File loaders (PDF/TXT/DOCX)  │                 │ - Semantic search (Chroma)    │
-│ - Chunking (800/100)           │                 │   top_k=5                     │
-│ - Add metadata (filename/page/ │                 │ - BM25 search (in-memory)     │
-│   upload_time)                 │                 │   built from Chroma docs      │
-│ - Embed + upsert to Chroma     │                 │ - Merge (RRF) → final top_k=5 │
-└───────────────┬──────────────-─┘                 └───────────────┬───────────────┘
-                │                                                 │
-                ▼                                                 ▼
-      ┌─────────────────────-──┐                      ┌───────────────────────────┐
-      │ Storage Layer          │                      │ Prompt + LLM Layer        │
-      │ ChromaDB (persistent)  │◄────────────────────►│ - Prompt: system + context│
-      │ - chunk text + metadata│   fetch chunk texts  │   + question              │
-      │ - embeddings           │   for BM25 index     │ - Stream tokens back      │
-      └──────────────────────-─┘                      └───────────────────────────┘
+                                       │ HTTP
+                                       │ /api/upload  /api/ask  /api/ask/stream  /api/collections
+                                       ▼
+         ┌──────────────────────────────────────────────────────────────────────────────┐
+         │                           API / Orchestration Layer                          │
+         │                         FastAPI Backend (port 8000)                          │
+         │  Cross-cutting: trace_id, structured logs, latency metrics, error handling   │
+         │  Guardrails: prompt-injection check, question length limit, context cap      │
+         └───────────────┬───────────────────────────────────────────────┬──────────────┘
+                         │                                               │
+                         │ Upload path                                   │ Query path
+                         ▼                                               ▼
+         ┌──────────────────────────────-─┐                 ┌───────────────────────────────┐
+         │ Ingestion Service              │                 │ Retrieval + QA Service        │
+         │ - File loaders (PDF/TXT/DOCX)  │                 │ - Semantic search (Chroma)    │
+         │ - Chunking (800/100)           │                 │   top_k=5                     │
+         │ - Add metadata (filename/page/ │                 │ - BM25 search (in-memory)     │
+         │   upload_time)                 │                 │   built from Chroma docs      │
+         │ - Embed + upsert to Chroma     │                 │ - Merge (RRF) → final top_k=5 │
+         └───────────────┬──────────────-─┘                 └───────────────┬───────────────┘
+                         │                                                  │
+                         ▼                                                  ▼
+               ┌─────────────────────-──┐                      ┌───────────────────────────┐
+               │ Storage Layer          │                      │ Prompt + LLM Layer        │
+               │ ChromaDB (persistent)  │◄────────────────────►│ - Prompt: system + context│
+               │ - chunk text + metadata│   fetch chunk texts  │   + question              │
+               │ - embeddings           │   for BM25 index     │ - Stream tokens back      │
+               └──────────────────────-─┘                      └───────────────────────────┘
 
    
 

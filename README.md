@@ -29,7 +29,7 @@ A conversational RAG application that answers questions from your uploaded docum
 
 ---
 ## b. Architecture overview
-##`High-level flow
+## High-level flow
 1. User (Streamlit UI) uploads files and asks questions.
 2. Streamlit → FastAPI calls:
    - POST /api/upload to ingest documents
@@ -83,10 +83,7 @@ A conversational RAG application that answers questions from your uploaded docum
                │ - embeddings           │   for BM25 index     │ - Stream tokens back      │
                └──────────────────────-─┘                      └───────────────────────────┘
 
-   
-
-```
-
+  
 - **UI**: Streamlit — file upload, chat, source references, session conversation memory.
 - **Backend**: FastAPI — `/upload`, `/ask`, `/collections`, `/collections/{name}` (DELETE).
 - **RAG**: LangChain — loaders, splitter, retriever, prompt, LLM.

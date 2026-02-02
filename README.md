@@ -29,28 +29,60 @@ A conversational RAG application that answers questions from your uploaded docum
 
 ---
 ## b. Architecture overview
-```
+##`High-level flow
+1. User (Streamlit UI) uploads files and asks questions.
+2. Streamlit → FastAPI calls:
+   - POST /api/upload to ingest documents
+   - POST /api/ask (or GET /api/ask/stream) to query
+3. Ingestion pipeline (FastAPI):
+   - Loader by type (PDF/TXT/DOC/DOCX)
+   - Chunking with RecursiveCharacterTextSplitter (800 / 100)
+   - Store chunks + metadata in ChromaDB (persistent local store)
+4. Retrieval pipeline (FastAPI) on each question:
+   - Semantic retrieval: Chroma similarity search (top 5)
+   - Keyword retrieval: BM25 over all stored chunks (top 5)
+   - Fusion: Reciprocal Rank Fusion (RRF) → final top 5 context chunks
+5. LLM answering (FastAPI):
+   - Build prompt = system instruction + retrieved context + user question
+   - Call chat model
+   - Return answer + optional source snippets; streaming endpoint streams tokens
+                    ┌──────────────────────────────────────────────┐
+                    │                 Client Layer                 │
+                    │           Streamlit UI (port 8501)           │
+                    │  - Upload files                              │
+                    │  - Chat + session memory                     │
+                    │  - Source toggle                              │
+                    └───────────────┬───────────────────────────────┘
+                                    │ HTTP
+                                    │ /api/upload  /api/ask  /api/ask/stream  /api/collections
+                                    ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           API / Orchestration Layer                          │
+│                         FastAPI Backend (port 8000)                          │
+│  Cross-cutting: trace_id, structured logs, latency metrics, error handling   │
+│  Guardrails: prompt-injection check, question length limit, context cap      │
+└───────────────┬───────────────────────────────────────────────┬──────────────┘
+                │                                               │
+                │ Upload path                                   │ Query path
+                ▼                                               ▼
+┌───────────────────────────────┐                 ┌───────────────────────────────┐
+│ Ingestion Service             │                 │ Retrieval + QA Service        │
+│ - File loaders (PDF/TXT/DOCX) │                 │ - Semantic search (Chroma)    │
+│ - Chunking (800/100)          │                 │   top_k=5                     │
+│ - Add metadata (filename/page/│                 │ - BM25 search (in-memory)     │
+│   upload_time)                │                 │   built from Chroma docs      │
+│ - Embed + upsert to Chroma    │                 │ - Merge (RRF) → final top_k=5 │
+└───────────────┬───────────────┘                 └───────────────┬───────────────┘
+                │                                                 │
+                ▼                                                 ▼
+      ┌───────────────────────┐                      ┌───────────────────────────┐
+      │ Storage Layer         │                      │ Prompt + LLM Layer        │
+      │ ChromaDB (persistent) │◄────────────────────►│ - Prompt: system + context│
+      │ - chunk text + metadata│   fetch chunk texts │   + question              │
+      │ - embeddings          │   for BM25 index     │ - Stream tokens back      │
+      └───────────────────────┘                      └───────────────────────────┘
+   
 
-┌─────────────┐     HTTP      ┌─────────────┐
-│  Streamlit  │ ◄──────────►  │   FastAPI   │
-│     UI      │   /upload     │   Backend   │
-│  (port 8501)│   /ask        │  (port 8000)│
-└─────────────┘   /collections└──────┬──────┘
-                                     │
-                    ┌────────────────┼────────────────┐
-                    │                │                │
-                    ▼                ▼                ▼
-             ┌────────────-┐  ┌────────────┐   ┌────────────┐
-             │  Ingestion  │  │  Hybrid    │   │   Ollama   │
-             │  (chunking) │  │  Retriever │   │    LLM     │
-             └──────┬──────┘  └─────┬──────┘   └────────────┘
-                    │               │
-                    │        ┌──────┴──────┐
-                    │        │  ChromaDB   │  (semantic)
-                    │        │  + BM25     │  (keyword)
-                    └───────►│  (vector +  │
-                             │   in-memory)│
-                             └────────────┘
 ```
 
 - **UI**: Streamlit — file upload, chat, source references, session conversation memory.

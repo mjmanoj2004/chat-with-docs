@@ -46,13 +46,14 @@ A conversational RAG application that answers questions from your uploaded docum
    - Build prompt = system instruction + retrieved context + user question
    - Call chat model
    - Return answer + optional source snippets; streaming endpoint streams tokens
+
                     ┌──────────────────────────────────────────────┐
                     │                 Client Layer                 │
                     │           Streamlit UI (port 8501)           │
                     │  - Upload files                              │
                     │  - Chat + session memory                     │
-                    │  - Source toggle                              │
-                    └───────────────┬───────────────────────────────┘
+                    │  - Source toggle                             │
+                    └───────────────┬──────────────────────────────┘
                                     │ HTTP
                                     │ /api/upload  /api/ask  /api/ask/stream  /api/collections
                                     ▼
@@ -65,22 +66,23 @@ A conversational RAG application that answers questions from your uploaded docum
                 │                                               │
                 │ Upload path                                   │ Query path
                 ▼                                               ▼
-┌───────────────────────────────┐                 ┌───────────────────────────────┐
-│ Ingestion Service             │                 │ Retrieval + QA Service        │
-│ - File loaders (PDF/TXT/DOCX) │                 │ - Semantic search (Chroma)    │
-│ - Chunking (800/100)          │                 │   top_k=5                     │
-│ - Add metadata (filename/page/│                 │ - BM25 search (in-memory)     │
-│   upload_time)                │                 │   built from Chroma docs      │
-│ - Embed + upsert to Chroma    │                 │ - Merge (RRF) → final top_k=5 │
-└───────────────┬───────────────┘                 └───────────────┬───────────────┘
+┌──────────────────────────────-─┐                 ┌───────────────────────────────┐
+│ Ingestion Service              │                 │ Retrieval + QA Service        │
+│ - File loaders (PDF/TXT/DOCX)  │                 │ - Semantic search (Chroma)    │
+│ - Chunking (800/100)           │                 │   top_k=5                     │
+│ - Add metadata (filename/page/ │                 │ - BM25 search (in-memory)     │
+│   upload_time)                 │                 │   built from Chroma docs      │
+│ - Embed + upsert to Chroma     │                 │ - Merge (RRF) → final top_k=5 │
+└───────────────┬──────────────-─┘                 └───────────────┬───────────────┘
                 │                                                 │
                 ▼                                                 ▼
-      ┌───────────────────────┐                      ┌───────────────────────────┐
-      │ Storage Layer         │                      │ Prompt + LLM Layer        │
-      │ ChromaDB (persistent) │◄────────────────────►│ - Prompt: system + context│
-      │ - chunk text + metadata│   fetch chunk texts │   + question              │
-      │ - embeddings          │   for BM25 index     │ - Stream tokens back      │
-      └───────────────────────┘                      └───────────────────────────┘
+      ┌─────────────────────-──┐                      ┌───────────────────────────┐
+      │ Storage Layer          │                      │ Prompt + LLM Layer        │
+      │ ChromaDB (persistent)  │◄────────────────────►│ - Prompt: system + context│
+      │ - chunk text + metadata│   fetch chunk texts  │   + question              │
+      │ - embeddings           │   for BM25 index     │ - Stream tokens back      │
+      └──────────────────────-─┘                      └───────────────────────────┘
+
    
 
 ```
